@@ -25,57 +25,72 @@ class _WebViewAppState extends State<WebViewApp> {
   int count1 = -1;
   int count2 = -1;
 
- void druck() {
-
- }
-
+  // Initialize controllers in initState
   @override
   void initState() {
     super.initState();
-    controller = WebViewController()..setNavigationDelegate(NavigationDelegate(
-      onNavigationRequest: (navigationRequest) {
-        
-        final Uri url = Uri.parse(navigationRequest.url);
-        if (count1 >= 0) {
+    controller = WebViewController()
+      ..setNavigationDelegate(NavigationDelegate(
+        onNavigationRequest: (navigationRequest) {
+          final Uri url = Uri.parse(navigationRequest.url);
+          if (count1 >= 0) {
             setState(() {
               start = url.toString().substring(url.toString().lastIndexOf('/') + 1);
             });
           }
-          // WebView provides your app with a NavigationDelegate, which enables your app to track and control the page navigation of the WebView widget. When a navigation is initiated by the WebView, for example when a user clicks on a link, the NavigationDelegate is called. The NavigationDelegate callback can be used to control whether the WebView proceeds with the navigation.
           count1++;
-          
-          
           return NavigationDecision.navigate;
         },
-    ))..loadRequest(
-        Uri.parse('https://de.wikipedia.org/wiki/Special:Random'),
-      );
-      controller2 = WebViewController()..setNavigationDelegate(NavigationDelegate(
-      onNavigationRequest: (navigationRequest) {
+      ));
+
+    controller2 = WebViewController()
+      ..setNavigationDelegate(NavigationDelegate(
+        onNavigationRequest: (navigationRequest) {
           final Uri url = Uri.parse(navigationRequest.url);
-        if (count2 >= 0) {
+          if (count2 >= 0) {
             setState(() {
               goal = url.toString().substring(url.toString().lastIndexOf('/') + 1);
             });
           }
-          // WebView provides your app with a NavigationDelegate, which enables your app to track and control the page navigation of the WebView widget. When a navigation is initiated by the WebView, for example when a user clicks on a link, the NavigationDelegate is called. The NavigationDelegate callback can be used to control whether the WebView proceeds with the navigation.
           count2++;
           return NavigationDecision.navigate;
         },
-    ))..loadRequest(
-        Uri.parse('https://de.wikipedia.org/wiki/Special:Random'),
-      );
+      ));
+
+    // Load initial pages
+    loadNewPages();
+  }
+
+  // Function to load new random pages
+  void loadNewPages() {
+    controller.loadRequest(Uri.parse('https://de.wikipedia.org/wiki/Special:Random'));
+    controller2.loadRequest(Uri.parse('https://de.wikipedia.org/wiki/Special:Random'));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              controller.reload();
+              controller2.reload();
+              loadNewPages();
+            },
+            child: Text("New game"),
+          ),
+        ],
         title: GestureDetector(
-          onTap: () {
-          },
-          
-          child: Text('Goal: $goal')),
+          onTap: () {},
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text('$goal', style: TextStyle(fontSize: 15),),
+            ],
+          ),
+
+        ),
       ),
       body: WebViewWidget(
         controller: controller,
